@@ -1,0 +1,55 @@
+services:
+  mssql-db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: mssql-db
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${MSSQL_SA_PASSWORD}", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+
+  mssql-init:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: mssql-init
+    depends_on:
+      mssql-db:
+        condition: service_healthy
+    volumes:
+      - ./init:/init:ro
+    entrypoint: >
+      /opt/mssql-tools18/bin/sqlcmd -S mssql-db -U sa -P "${MSSQL_SA_PASSWORD}" -C -i /init/init-schema.sql
+
+
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: cloudbeaver
+    ports:
+      - "8978:8978"
+    volumes:
+      - cloudbeaver-data:/opt/cloudbeaver/workspace
+      - ./data-sources.json:/opt/cloudbeaver/workspace/GlobalConfiguration/.dbeaver/data-sources.json:ro
+    restart: unless-stopped
+    depends_on:
+      - mssql-db
+    environment:
+      CB_SERVER_NAME: "DB Learning Server"
+      CB_SERVER_URL: "http://localhost:8978/"
+      CB_ADMIN_NAME: "cbadmin"
+      CB_ADMIN_PASSWORD: "${CLOUDBEAVER_ADMIN_PASSWORD}"
+
+
+volumes:
+  mssql-data:
+  cloudbeaver-data:

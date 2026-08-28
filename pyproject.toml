@@ -1,0 +1,19 @@
+[project]
+name = "equity-market-data-pipeline-with-automated-health-checks"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Mohanad Osman", email = "34104848+MoHoThrives@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=3.0.5",
+]
+
+[project.scripts]
+equity-market-data-pipeline-with-automated-health-checks = "equity_market_data_pipeline_with_automated_health_checks:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
