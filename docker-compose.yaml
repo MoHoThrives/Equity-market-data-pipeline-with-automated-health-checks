@@ -49,6 +49,17 @@ services:
       CB_ADMIN_NAME: "cbadmin"
       CB_ADMIN_PASSWORD: "${CLOUDBEAVER_ADMIN_PASSWORD}"
 
+  ingest:
+    build: .
+    container_name: ingest
+    depends_on:
+      mssql-db:
+        condition: service_healthy
+      mssql-init:
+        condition: service_completed_successfully
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+
 
 volumes:
   mssql-data:
